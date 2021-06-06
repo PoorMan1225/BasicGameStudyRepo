@@ -26,6 +26,7 @@ class GameView(context: Context, attrs:AttributeSet? = null): View(context, attr
         override fun run() {
             makeBubble()
             moveBubble()
+            removeDead()
             invalidate()
             handler?.postDelayed(this, 10)
         }
@@ -68,11 +69,23 @@ class GameView(context: Context, attrs:AttributeSet? = null): View(context, attr
     // Touch Event 로 부터 터치 좌표를 전달받아 모든 비눗방울을 조사한다.
     // 터치 위에 있는 비눗 방울은 최초로 발견된 것만 제거한다. return 이 없으면
     // 여러개의 데이터가 삭제 될수 있고 인덱스가 뒤로 밀리면서 에러가 발생할 수 있다.
+
+    // 핸들러와 onTouchEvent 사이에서 인터럽트가 발생할 수 있기 때문에 여기서는
+    // 표시만해서 핸들러에서 따로 삭제하도록 수정한다.
     private fun hitTest(x:Float, y:Float) {
         mBubble.forEach { bubble ->
             if(bubble.hitTest(x, y)) {
-                mBubble.remove(bubble)
                 return
+            }
+        }
+    }
+
+    // 삭제 표시가 있는 풍선을 한번에 삭제하는 함수
+    // ArrayList 와 마찬가지로 MutableList 도 뒤에서 부터 인덱스를 삭제해야 한다.
+    private fun removeDead() {
+        for(i in mBubble.size-1 downTo 0) {
+            if(mBubble[i].isDead) {
+                mBubble.removeAt(i)
             }
         }
     }

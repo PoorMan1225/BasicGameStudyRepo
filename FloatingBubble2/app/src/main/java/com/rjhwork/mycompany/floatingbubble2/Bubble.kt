@@ -21,6 +21,8 @@ class Bubble(context:Context, val sw:Int, val sh:Int) {
     private val dir = PointF()          // 이동 방향과 속도가 설정된 Vector 이다.
     private val rnd = Random()          // 비눗방울 크기 랜덤.
 
+    var isDead:Boolean = false  // 삭제 표시를 위한 변수.
+
     init {
         // 비눗 방울 크기 랜덤하게 설정.
         r = rnd.nextInt(71) + 50 //50 ~ 120
@@ -85,8 +87,10 @@ class Bubble(context:Context, val sw:Int, val sh:Int) {
     // y = (rnd.nextInt(sh - r * 4) + r * 2).toFloat()
     // 그래서 여기서는 해당 좌표에서 길이값으로 원내부인지 판단하면 된다.
 
+    // onTouchEvent 에서 메소드에서 삭제할때 인터럽트가 발생할 수 있으므로
+    // 삭제할 풍선들을 표시만 해주는 식으로 코드를 변경한다.
     fun hitTest(px:Float, py:Float): Boolean {
-        val dist = (x - px) * (x - px) + (y - py) * (y - py)
-        return (dist < r * r)
+        isDead = (x - px) * (x - px) + (y - py) * (y - py) < r * r
+        return isDead
     }
 }
