@@ -1,0 +1,130 @@
+package com.rjhwork.mycompany.floatingbubble3
+
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.View
+import java.util.*
+
+class GameView(context: Context, attrs:AttributeSet? = null): View(context, attrs) {
+    private lateinit var imgBack: Bitmap
+    private val mBubble = mutableListOf<Bubble>()
+    private val rnd = Random()
+    private val paint = Paint()
+
+    // 화면 크기.
+    private var w:Int = 0
+    private var h:Int = 0
+
+    private val repeatAction = object :Runnable {
+        override fun run() {
+            Time.update()
+
+            makeBubble()
+            moveBubble()
+            removeDead()
+            invalidate()
+            handler?.postDelayed(this, 10)
+        }
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        this.w = w
+        this.h = h
+
+        imgBack = BitmapFactory.decodeResource(resources, R.drawable.sky)
+        imgBack = Bitmap.createScaledBitmap(imgBack, w, h, true)
+    }
+
+    override fun onDraw(canvas: Canvas?) {
+        canvas ?: return
+
+        canvas.drawBitmap(imgBack, 0f, 0f, null)
+
+        mBubble.forEach {
+            canvas.drawBitmap(it.bubble, (it.x - it.r), (it.y - it.r), null)
+        }
+
+        mSmall.forEach {
+            paint.alpha = it.alpha
+            canvas.drawBitmap(it.bubble, it.px - it.r, it.py - it.r, paint)
+        }
+    }
+
+    // 비눗 방울 수를 20개 이내로 제한 하며, 매 프레임마다
+    // 8/1000의 확률로 나타나게 한다. 이함수는 핸들러가 호출한다.
+    private fun makeBubble() {
+        if(mBubble.size < 20 && rnd.nextInt(1000) < 8) {
+            mBubble.add(Bubble(context, w, h))
+        }
+    }
+
+    // 비눗 방울 이동.
+    private fun moveBubble() {
+        mBubble.forEach {
+            it.update()
+        }
+
+        // 파편의 이동.
+        mSmall.forEach {
+            it.update()
+        }
+    }
+
+    // Touch Event 로 부터 터치 좌표를 전달받아 모든 비눗방울을 조사한다.
+    // 터치 위에 있는 비눗 방울은 최초로 발견된 것만 제거한다. return 이 없으면
+    // 여러개의 데이터가 삭제 될수 있고 인덱스가 뒤로 밀리면서 에러가 발생할 수 있다.
+
+    // 핸들러와 onTouchEvent 사이에서 인터럽트가 발생할 수 있기 때문에 여기서는
+    // 표시만해서 핸들러에서 따로 삭제하도록 수정한다.
+    private fun hitTest(x:Float, y:Float) {
+        mBubble.forEach { bubble ->
+            if(bubble.hitTest(x, y)) {
+                return
+            }
+        }
+    }
+
+    // 삭제 표시가 있는 풍선을 한번에 삭제하는 함수
+    // ArrayList 와 마찬가지로 MutableList 도 뒤에서 부터 인덱스를 삭제해야 한다.
+    private fun removeDead() {
+        for(i in mBubble.size-1 downTo 0) {
+            if(mBubble[i].isDead) {
+                mBubble.removeAt(i)
+            }
+        }
+
+        // 파편 제거
+        for(i in mSmall.size-1 downTo 0) {
+            if(mSmall[i].isDead) {
+                mSmall.removeAt(i)
+            }
+        }
+    }
+
+    // customView 액티비티에 attach 될때 바로 핸들러 호출.
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        postDelayed(repeatAction, 100)
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        event ?: return false
+
+        if(event.action == MotionEvent.ACTION_DOWN) {
+            hitTest(event.x, event.y)
+        }
+        return true
+    }
+
+    companion object {
+        // 비눗방울의 파편은 GameView 에 저장해야 하므로
+        // SmallBubble을 GameView 에 리스트로 만든다.
+        val mSmall = mutableListOf<SmallBubble>()
+    }
+}
