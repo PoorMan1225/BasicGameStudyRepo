@@ -7,7 +7,7 @@ import java.util.*
 
 // Bubble 클래스는 View 나 Activity 를 상속 받지 않으므로
 // Context 객체를 생성자로 받아야 한다.
-// 화면의 크기, s,w, 비눗 방을의 초기위치 px, py
+// 화면의 크기, sw,sh, 비눗 방을의 초기위치 px, py
 class Bubble(context:Context, val sw:Int, val sh:Int, px:Int, py:Int) {
 
     var bubble: Bitmap   // 비눗방울 비트맵.
