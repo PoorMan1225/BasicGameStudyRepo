@@ -116,6 +116,7 @@ class GameView(context: Context, attrs: AttributeSet? = null) : View(context, at
         }
     }
 
+    // 죽었다 표시한 것만 따로 돌면서 사라짐.
     private fun removeDead() {
         synchronized(mBubble) {
             for (i in mBubble.size - 1 downTo 0) {

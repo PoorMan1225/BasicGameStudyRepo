@@ -1,4 +1,4 @@
-package com.rjhwork.mycompany.huntingbird
+package com.rjhwork.mycompany.huntingbird2
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -7,8 +7,7 @@ import android.graphics.PointF
 import android.graphics.RectF
 import java.util.*
 
-class Sparrow(private val context: Context,
-              private val sw:Int,       // 화면 넓이
+class Sparrow(private val sw:Int,       // 화면 넓이
               private val sh:Int) {     // 화면 높이
 
     private val rect = RectF()          // 터치 영역
@@ -19,20 +18,17 @@ class Sparrow(private val context: Context,
     private var animSpan:Float = 0.0f   // 이미지를 그린 후 현재 프레임 까지 경과한 시간
     private var animNum:Int = 0         // 현재 그린 이미지 번호.
 
-    private val listBirds = mutableListOf<Bitmap>()     // 이미지 리스트
-
     var x:Float = 0f                    // 참새 위치
     var y:Float = 0f                    // 참새 위치
 
-    var w:Int = 0                       // 참새 크기 의 절반.
-    var h:Int = 0                       // 참새 크기 의 절반.
+    var w:Int = CommonResources.bw      // 참새 크기 의 절반.
+    var h:Int = CommonResources.bh      // 참새 크기 의 절반.
 
-    lateinit var bird:Bitmap            // 현재 이미지
+    var bird:Bitmap = CommonResources.listBirds[0]  // 현재 이미지
     var ang:Int = 0                     // 추락할 때 참새 회전
     var isDead:Boolean = false          // 참새 사망.
 
     init {
-        makeSprite(context)
         iniSparrow()
     }
 
@@ -57,25 +53,6 @@ class Sparrow(private val context: Context,
         // 참새의 초기 위치
         x = (-w * 2).toFloat()          // 절반의 두배만큼 옆으로 가야 완전히 사라짐.
         y = (rand.nextInt(sh - 500) + 100).toFloat() // 수직 위치 랜덤하게 설정.
-    }
-
-    // 참새 이미지 분리.
-    private fun makeSprite(context: Context) {
-        val org = BitmapFactory.decodeResource(context.resources, R.drawable.sparrow)
-        val bw = org.width / 6          // 한개 이미지의 넓이.
-        val bh = org.height
-
-        (0..5).forEach { idx ->
-            // 이미지가 연속적이므로 이미지를 자를 좌표에
-            // x 좌표부터 x + 이미지 넓이를 자른다.
-            listBirds.add(Bitmap.createBitmap(org, bw * idx, 0, bw,  bh))
-        }
-
-        w = bw / 2
-        h = bh / 2
-
-        // 초기이미지 지정.
-        bird = listBirds[0]
     }
 
     // 참새 이동
@@ -111,7 +88,7 @@ class Sparrow(private val context: Context,
         if(animNum >= 5) {
             animNum = 0
         }
-        bird = listBirds[animNum]
+        bird = CommonResources.listBirds[animNum]
     }
 
     // 참새 터치 영역의 판정
