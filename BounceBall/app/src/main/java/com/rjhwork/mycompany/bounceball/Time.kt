@@ -1,7 +1,5 @@
-package com.rjhwork.mycompany.floatingbubble3t
+package com.rjhwork.mycompany.bounceball
 
-// Time Class 는 매 프레임마다 한 번만 계산되므로 스레드나 핸들러에서
-// 호출하면 된다.
 class Time {
     companion object {
         private var currentTime = System.nanoTime()
